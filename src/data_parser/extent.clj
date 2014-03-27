@@ -46,8 +46,13 @@
   extp/ExtentProtocol
   (next [this] (create filename (get-in header [:x-next :offset])))
   (prev [this] (create filename (get-in header [:x-prev :offset])))
-  (first-record [this] (record/create filename (:data-offset header)))
-  (records [this] (records-list (extp/first-record this))))
+  (first-record [this] (let [rec (:first-record header)
+                             file (:file-number rec)
+                             offs (:offset rec)]
+                         (when-not (neg? file)
+                           (record/create filename offs))))
+  (records [this] (when-let [fr (extp/first-record this)]
+                    (records-list fr))))
 
 (defn create-header
   [filename offset]
